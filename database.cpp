@@ -39,12 +39,17 @@ bool Database::hasAnyTables()
     return false;
 }
 
-bool Database::createTable(QByteArray tableName, QByteArray values)
+bool Database::createTable(QByteArray tableName, QList<QByteArray> values)
 {
     QSqlQuery query(db);
+    QByteArray aux = "";
+    foreach (QByteArray v, values) {
+        aux += v + ",";
+    }
+    aux.remove(aux.size() - 1,1);
     bool ok = query.exec("CREATE TABLE "
                          +tableName+
-                         "("+values+
+                         "("+aux+
                          ")");
     if(!ok)
         qDebug() << query.lastError().text();
@@ -138,26 +143,20 @@ bool Database::deleteFrom(QByteArray tableName, QByteArray where)
     return ok;
 }
 
-bool Database::insertInto(QByteArray tableName, QByteArray values)
+bool Database::insertInto(QByteArray tableName, QMap<QString, QString> properties)
 {
     QSqlQuery query(db);
-    bool ok = query.exec("INSERT INTO "+
-                         tableName+
-                         " VALUES("+
-                         values+
-                         ")");
+    QByteArray roles = "";
+    QByteArray values = "";
 
-    if(!ok)
-        emit updateLog(("ERR.05 : " + query.lastError().text()).toLatin1());
-    else
-        emit updateLog("INSERT COMMAND EXECUTED WITH SUCESS!");
+    foreach (QString k, properties.keys()) {
+        roles += k + ",";
+        values += properties.value(k) + ",";
+    }
 
-    return ok;
-}
+    roles.remove(roles.size() - 1,1);
+    values.remove(values.size() - 1,1);
 
-bool Database::insertInto(QByteArray tableName, QByteArray roles, QByteArray values)
-{
-    QSqlQuery query(db);
     bool ok = query.exec("INSERT INTO "+
                          tableName+
                          "("+
@@ -175,9 +174,14 @@ bool Database::insertInto(QByteArray tableName, QByteArray roles, QByteArray val
     return ok;
 }
 
-bool Database::updateUser(QByteArray tableName, QByteArray updateValues, QByteArray where)
+bool Database::updateUser(QByteArray tableName, QMap<QString, QString> properties, QByteArray where)
 {
     QSqlQuery query(db);
+    QByteArray updateValues = "";
+    foreach (QString k, properties.keys()) {
+        updateValues += k+"="+properties.value(k)+",";
+    }
+    updateValues.remove(updateValues.size()-1,1);
     bool ok = query.exec("UPDATE "+
                          tableName+
                          " SET "+
