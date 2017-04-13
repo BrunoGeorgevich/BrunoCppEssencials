@@ -21,6 +21,7 @@ public:
     Database(QByteArray path, QByteArray userName, QByteArray password);
     bool dbExists();
     bool hasAnyTables();
+    QStringList tables();
     bool createTable(QByteArray tableName, QList<QByteArray> values);
     bool dropTable(QByteArray tableName);
     QVariantList select(QByteArray tableName, QByteArray criteria, QByteArray where);

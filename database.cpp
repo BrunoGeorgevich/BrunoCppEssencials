@@ -39,6 +39,11 @@ bool Database::hasAnyTables()
     return false;
 }
 
+QStringList Database::tables()
+{
+    return db.tables();
+}
+
 bool Database::createTable(QByteArray tableName, QList<QByteArray> values)
 {
     QSqlQuery query(db);
@@ -166,8 +171,17 @@ bool Database::insertInto(QByteArray tableName, QMap<QString, QString> propertie
                          values+
                          ")");
 
-    if(!ok)
+    if(!ok) {
         emit updateLog(("ERR.05 : " + query.lastError().text()).toLatin1());
+        qDebug() << "INSERT INTO "+
+                    tableName+
+                    "("+
+                    roles+
+                    ")"+
+                    " VALUES("+
+                    values+
+                    ")";
+    }
     else
         emit updateLog("INSERT COMMAND EXECUTED WITH SUCESS!");
 
@@ -196,4 +210,3 @@ bool Database::updateUser(QByteArray tableName, QMap<QString, QString> propertie
 
     return ok;
 }
-
